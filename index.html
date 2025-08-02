@@ -16,7 +16,6 @@
     const apiKey = "AIzaSyC3m6k8ONG67lMr3YMEGT4svIWaYxig-BY";
 
     let title = "";
-    // The `thumbnail` variable and related logic are now removed
     let primaryKeyword = "";
     let secondaryKeywords = ["", "", "", "", ""];
     let descriptions = [];
@@ -42,9 +41,9 @@
       const app = document.getElementById("app");
 
       app.innerHTML = `
-        <div class="min-h-screen bg-gray-900 text-white p-4 sm:p-8 flex justify-center">
+        <div class="min-h-screen bg-gray-900 text-white p-4 sm:p-8 flex justify-center items-center">
           <div class="bg-gray-800 p-6 sm:p-10 rounded-xl shadow-2xl w-full max-w-4xl">
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-center mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-center mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
               YouTube Description Generator ✍️
             </h1>
             <p class="text-center text-gray-400 mb-6">Fill in the details below to generate SEO-friendly video descriptions</p>
