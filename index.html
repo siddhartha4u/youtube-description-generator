@@ -59,8 +59,9 @@
 
                         <!-- Thumbnail (Optional) -->
                         <div class="mb-4">
-                            <label class="block mb-2 text-gray-300 font-bold">Attach Thumbnail (Optional)</label>
-                            <input type="file" id="thumbnail" accept="image/*" class="text-white bg-gray-700 file:bg-gray-600 file:text-white file:rounded-lg file:px-4 file:py-2"/>
+                            <label class="block mb-2 text-gray-300 font-bold">Attach Thumbnail</label>
+                            <input type="file" id="thumbnail" accept="image/png, image/jpeg" class="text-white bg-gray-700 file:bg-gray-600 file:text-white file:rounded-lg file:px-4 file:py-2"/>
+                            <p class="text-gray-500 text-sm mt-1">Only PNG, JPG format acceptable. Size below 1MB.</p>
                         </div>
 
                         <!-- Primary Keyword -->
@@ -105,13 +106,12 @@
                             : ""}
                     </div>
                 </div>`;
-
-            // Input listeners
+            
+            // Add listeners after rendering
             document.getElementById("title").oninput = e => {
                 title = e.target.value;
-                if(e.target.value.trim()){
-                    document.getElementById("thumbnail").value = null; // Clear file input when title is entered
-                    thumbnail = null;
+                if(title.trim()){
+                    thumbnail = null; // Clear thumbnail data
                 }
                 render();
             };
@@ -144,12 +144,7 @@
                 error = "API Key is missing. Please add your key to the code to proceed.";
                 render(); return;
             }
-            if(thumbnail && thumbnail.size > 1048576){
-                 error = "File size exceeds 1MB. Please upload a smaller image.";
-                 render(); return;
-            }
-
-
+            
             loading = true;
             error = "";
             descriptions = [];
@@ -240,7 +235,7 @@
                 } else {
                     error = ""; // Clear any previous errors
                     thumbnail = file;
-                    title = ""; // Clear title input when thumbnail is attached
+                    // Note: We no longer clear the title here. It's handled by the title input's oninput.
                 }
             } else {
                 thumbnail = null;
