@@ -134,10 +134,25 @@
             thumbInput && (thumbInput.onchange = e => {
                 const file = e.target.files[0];
                 if(file){
-                    thumbnail = file;
-                    title = ""; // Clear title input when thumbnail is attached
+                    const validTypes = ['image/png', 'image/jpeg'];
+                    const maxSize = 1048576; // 1 MB in bytes
+
+                    if (!validTypes.includes(file.type)) {
+                        error = "Invalid file type. Please upload a JPG or PNG image.";
+                        thumbnail = null;
+                        e.target.value = ''; // Clear the file input
+                    } else if (file.size > maxSize) {
+                        error = "File size exceeds 1MB. Please upload a smaller image.";
+                        thumbnail = null;
+                        e.target.value = ''; // Clear the file input
+                    } else {
+                        error = ""; // Clear any previous errors
+                        thumbnail = file;
+                        title = ""; // Clear title input when thumbnail is attached
+                    }
                 } else {
                     thumbnail = null;
+                    error = ""; // Clear error if file input is cleared
                 }
                 render();
             });
@@ -156,6 +171,11 @@
                 error = "API Key is missing. Please add your key to the code to proceed.";
                 render(); return;
             }
+            if(thumbnail && thumbnail.size > 1048576){
+                 error = "File size exceeds 1MB. Please upload a smaller image.";
+                 render(); return;
+            }
+
 
             loading = true;
             error = "";
