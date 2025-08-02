@@ -129,33 +129,6 @@
             document.querySelectorAll(".copy-btn").forEach(btn => {
                 btn.onclick = () => copyToClipboard(btn.dataset.text);
             });
-
-            const thumbInput = document.getElementById("thumbnail");
-            thumbInput && (thumbInput.onchange = e => {
-                const file = e.target.files[0];
-                if(file){
-                    const validTypes = ['image/png', 'image/jpeg'];
-                    const maxSize = 1048576; // 1 MB in bytes
-
-                    if (!validTypes.includes(file.type)) {
-                        error = "Invalid file type. Please upload a JPG or PNG image.";
-                        thumbnail = null;
-                        e.target.value = ''; // Clear the file input
-                    } else if (file.size > maxSize) {
-                        error = "File size exceeds 1MB. Please upload a smaller image.";
-                        thumbnail = null;
-                        e.target.value = ''; // Clear the file input
-                    } else {
-                        error = ""; // Clear any previous errors
-                        thumbnail = file;
-                        title = ""; // Clear title input when thumbnail is attached
-                    }
-                } else {
-                    thumbnail = null;
-                    error = ""; // Clear error if file input is cleared
-                }
-                render();
-            });
         };
 
         const generateDescriptions = async () => {
@@ -248,6 +221,33 @@
             loading = false;
             render();
         };
+
+        const thumbInput = document.getElementById("thumbnail");
+        thumbInput && (thumbInput.onchange = e => {
+            const file = e.target.files[0];
+            if(file){
+                const validTypes = ['image/png', 'image/jpeg'];
+                const maxSize = 1048576; // 1 MB in bytes
+
+                if (!validTypes.includes(file.type)) {
+                    error = "Invalid file type. Please upload a JPG or PNG image.";
+                    thumbnail = null;
+                    e.target.value = ''; // Clear the file input
+                } else if (file.size > maxSize) {
+                    error = "File size exceeds 1MB. Please upload a smaller image.";
+                    thumbnail = null;
+                    e.target.value = ''; // Clear the file input
+                } else {
+                    error = ""; // Clear any previous errors
+                    thumbnail = file;
+                    title = ""; // Clear title input when thumbnail is attached
+                }
+            } else {
+                thumbnail = null;
+                error = ""; // Clear error if file input is cleared
+            }
+            render();
+        });
 
         render();
     </script>
