@@ -78,7 +78,7 @@
                             ${loading ? spinner() : "Generate Descriptions"}
                         </button>
 
-                        ${error ? `<p class="text-red-400 text-center mt-4">${error}</p>` : ""}
+                        ${error ? `<p id="error-message" class="text-red-400 text-center mt-4">${error}</p>` : ""}
 
                         <!-- Output Descriptions -->
                         ${descriptions.length > 0
@@ -98,20 +98,20 @@
                     </div>
                 </div>`;
             
-            // Add listeners after rendering
-            document.getElementById("title").oninput = e => {
+            // Add listeners
+            document.getElementById("title").addEventListener('input', (e) => {
                 title = e.target.value;
-                render();
-            };
-            document.getElementById("primaryKeyword").oninput = e => {
+                updateUI();
+            });
+            document.getElementById("primaryKeyword").addEventListener('input', (e) => {
                 primaryKeyword = e.target.value;
-                render();
-            };
+                updateUI();
+            });
             document.querySelectorAll(".secondary-keyword").forEach(input => {
-                input.oninput = e => {
+                input.addEventListener('input', (e) => {
                     secondaryKeywords[parseInt(e.target.dataset.index)] = e.target.value;
-                    render();
-                };
+                    updateUI();
+                });
             });
             document.getElementById("generateBtn").onclick = generateDescriptions;
             document.querySelectorAll(".copy-btn").forEach(btn => {
@@ -119,24 +119,46 @@
             });
         };
 
+        const updateUI = () => {
+            // This function updates the UI without re-rendering the entire page
+            const canGenerate = title.trim() && primaryKeyword.trim() && !loading;
+            const generateBtn = document.getElementById("generateBtn");
+
+            if (generateBtn) {
+                if (canGenerate) {
+                    generateBtn.disabled = false;
+                    generateBtn.className = "w-full p-4 rounded-lg font-bold text-white transition-all bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 transform hover:scale-105";
+                } else {
+                    generateBtn.disabled = true;
+                    generateBtn.className = "w-full p-4 rounded-lg font-bold text-white transition-all bg-gray-600 cursor-not-allowed";
+                }
+                generateBtn.innerHTML = loading ? spinner() : "Generate Descriptions";
+            }
+
+            const errorMessage = document.getElementById("error-message");
+            if (errorMessage) {
+                errorMessage.innerText = error;
+            }
+        };
+
         const generateDescriptions = async () => {
             if (!primaryKeyword.trim()) {
                 error = "Primary keyword is required.";
-                render(); return;
+                updateUI(); return;
             }
             if (!title.trim()) {
                 error = "Please enter a title.";
-                render(); return;
+                updateUI(); return;
             }
             if(!apiKey || apiKey === "PASTE_YOUR_API_KEY_HERE"){
                 error = "API Key is missing. Please add your key to the code to proceed.";
-                render(); return;
+                updateUI(); return;
             }
             
             loading = true;
             error = "";
             descriptions = [];
-            render();
+            updateUI();
 
             const filteredSecondaries = secondaryKeywords.filter(k => k.trim());
             let parts = [];
@@ -183,10 +205,38 @@
             }
 
             loading = false;
-            render();
+            updateUI();
+            renderDescriptions();
         };
 
-        render();
+        const renderDescriptions = () => {
+             const outputSection = document.querySelector('.mt-8'); // Assuming the output section is the div with margin-top 8
+            if (!outputSection) return;
+
+             if (descriptions.length > 0) {
+                const descriptionsHtml = descriptions.map(desc => `
+                                        <div class="bg-gray-700 p-4 rounded-lg">
+                                            <p class="text-white mb-2 whitespace-pre-line">${desc}</p>
+                                            <button class="copy-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" data-text="${desc.replace(/"/g, '&quot;')}">
+                                                Copy Description
+                                            </button>
+                                        </div>`).join('');
+                outputSection.innerHTML = `
+                                <h2 class="text-2xl text-center text-gray-200 mb-4 font-bold">Generated Descriptions</h2>
+                                <div class="space-y-4">
+                                    ${descriptionsHtml}
+                                </div>`;
+                document.querySelectorAll(".copy-btn").forEach(btn => {
+                    btn.onclick = () => copyToClipboard(btn.dataset.text);
+                });
+             } else {
+                outputSection.innerHTML = '';
+             }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            render();
+        });
     </script>
 </body>
 </html>
