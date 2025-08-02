@@ -1,182 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>YouTube Description Generator</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body { font-family: 'Inter', sans-serif; background-color: #0d1117; }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YouTube Description Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #0d1117; }
+  </style>
 </head>
 <body>
-  <div id="app"></div>
+  <div id="app"></div>
 
-  <script>
-    const apiKey = "AIzaSyC3m6k8ONG67lMr3YMEGT4svIWaYxig-BY";
+  <script>
+    const apiKey = "AIzaSyC3m6k8ONG67lMr3YMEGT4svIWaYxig-BY";
 
-    let title = "";
-    let thumbnail = "";
-    let primaryKeyword = "";
-    let secondaryKeywords = ["", "", "", "", ""];
-    let descriptions = [];
-    let loading = false;
-    let error = "";
+    let title = "";
+    // The `thumbnail` variable and related logic are now removed
+    let primaryKeyword = "";
+    let secondaryKeywords = ["", "", "", "", ""];
+    let descriptions = [];
+    let loading = false;
+    let error = "";
 
-    const copyToClipboard = text => {
-      const temp = document.createElement("textarea");
-      temp.value = text;
-      document.body.appendChild(temp);
-      temp.select();
-      document.execCommand("copy");
-      document.body.removeChild(temp);
-    };
+    const copyToClipboard = text => {
+      const temp = document.createElement("textarea");
+      temp.value = text;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand("copy");
+      document.body.removeChild(temp);
+    };
 
-    const spinner = () => `
-      <svg class="animate-spin h-5 w-5 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-      </svg>`;
+    const spinner = () => `
+      <svg class="animate-spin h-5 w-5 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+      </svg>`;
 
-    const render = () => {
-      const app = document.getElementById("app");
+    const render = () => {
+      const app = document.getElementById("app");
 
-      app.innerHTML = `
-        <div class="min-h-screen bg-gray-900 text-white p-4 sm:p-8 flex justify-center">
-          <div class="bg-gray-800 p-6 sm:p-10 rounded-xl shadow-2xl w-full max-w-4xl">
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-center mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
-              YouTube Description Generator ✍️
-            </h1>
-            <p class="text-center text-gray-400 mb-6">Fill in the details below to generate SEO-friendly video descriptions</p>
+      app.innerHTML = `
+        <div class="min-h-screen bg-gray-900 text-white p-4 sm:p-8 flex justify-center">
+          <div class="bg-gray-800 p-6 sm:p-10 rounded-xl shadow-2xl w-full max-w-4xl">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-center mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
+              YouTube Description Generator ✍️
+            </h1>
+            <p class="text-center text-gray-400 mb-6">Fill in the details below to generate SEO-friendly video descriptions</p>
 
-            <!-- YouTube Title -->
-            <div class="mb-4">
-              <label class="block mb-2 text-gray-300 font-bold">YouTube Video Title</label>
-              <input id="title" class="w-full p-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none" value="${title}" placeholder="e.g. Best AI Tools for Students in 2025" />
-            </div>
+                        <div class="mb-4">
+              <label class="block mb-2 text-gray-300 font-bold">YouTube Video Title</label>
+              <input id="title" class="w-full p-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none" value="${title}" placeholder="e.g. Best AI Tools for Students in 2025" />
+            </div>
 
-            <!-- Thumbnail (Optional) -->
-            <div class="mb-4">
-              <label class="block mb-2 text-gray-300 font-bold">Attach Thumbnail (Optional)</label>
-              <input type="file" id="thumbnail" accept="image/*" class="text-white bg-gray-700 file:bg-gray-600 file:text-white file:rounded-lg file:px-4 file:py-2"/>
-            </div>
+                        <div class="mb-4">
+              <label class="block mb-2 text-gray-300 font-bold">Primary Keyword</label>
+              <input id="primaryKeyword" class="w-full p-3 rounded-lg bg-gray-700 text-white border border-gray-600" value="${primaryKeyword}" placeholder="Required keyword e.g. AI tools" />
+            </div>
 
-            <!-- Primary Keyword -->
-            <div class="mb-4">
-              <label class="block mb-2 text-gray-300 font-bold">Primary Keyword</label>
-              <input id="primaryKeyword" class="w-full p-3 rounded-lg bg-gray-700 text-white border border-gray-600" value="${primaryKeyword}" placeholder="Required keyword e.g. AI tools" />
-            </div>
+                        <div class="mb-6">
+              <label class="block mb-2 text-gray-300 font-bold">Secondary Keywords (Optional - Max 5)</label>
+              ${secondaryKeywords.map((kw, i) => `
+                <input class="w-full mb-2 p-2 rounded-lg bg-gray-700 text-white border border-gray-600 secondary-keyword" data-index="${i}" value="${kw}" placeholder="Secondary Keyword ${i + 1}" />
+              `).join('')}
+            </div>
 
-            <!-- Secondary Keywords -->
-            <div class="mb-6">
-              <label class="block mb-2 text-gray-300 font-bold">Secondary Keywords (Optional - Max 5)</label>
-              ${secondaryKeywords.map((kw, i) => `
-                <input class="w-full mb-2 p-2 rounded-lg bg-gray-700 text-white border border-gray-600 secondary-keyword" data-index="${i}" value="${kw}" placeholder="Secondary Keyword ${i + 1}" />
-              `).join('')}
-            </div>
+                        <button id="generateBtn" ${loading && "disabled"}
+              class="w-full p-4 rounded-lg font-bold text-white transition-all
+              ${loading
+                ? 'bg-gray-600 cursor-not-allowed'
+                : 'bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 transform hover:scale-105'}">
+              ${loading ? spinner() : "Generate Descriptions"}
+            </button>
 
-            <!-- Generate Button -->
-            <button id="generateBtn" ${loading && "disabled"}
-              class="w-full p-4 rounded-lg font-bold text-white transition-all
-              ${loading
-                ? 'bg-gray-600 cursor-not-allowed'
-                : 'bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 transform hover:scale-105'}">
-              ${loading ? spinner() : "Generate Descriptions"}
-            </button>
+            ${error ? `<p class="text-red-400 text-center mt-4">${error}</p>` : ""}
 
-            ${error ? `<p class="text-red-400 text-center mt-4">${error}</p>` : ""}
+                        ${descriptions.length > 0
+              ? `<div class="mt-8">
+                  <h2 class="text-2xl text-center text-gray-200 mb-4 font-bold">Generated Descriptions</h2>
+                  <div class="space-y-4">
+                    ${descriptions.map(desc => `
+                      <div class="bg-gray-700 p-4 rounded-lg">
+                        <p class="text-white mb-2 whitespace-pre-line">${desc}</p>
+                        <button class="copy-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" data-text="${desc.replace(/"/g, '&quot;')}">
+                          Copy Description
+                        </button>
+                      </div>`).join('')}
+                  </div>
+                </div>`
+              : ""}
+          </div>
+        </div>`;
 
-            <!-- Output Descriptions -->
-            ${descriptions.length > 0
-              ? `<div class="mt-8">
-                  <h2 class="text-2xl text-center text-gray-200 mb-4 font-bold">Generated Descriptions</h2>
-                  <div class="space-y-4">
-                    ${descriptions.map(desc => `
-                      <div class="bg-gray-700 p-4 rounded-lg">
-                        <p class="text-white mb-2 whitespace-pre-line">${desc}</p>
-                        <button class="copy-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" data-text="${desc.replace(/"/g, '&quot;')}">
-                          Copy Description
-                        </button>
-                      </div>`).join('')}
-                  </div>
-                </div>`
-              : ""}
-          </div>
-        </div>`;
+      // Input listeners
+      document.getElementById("title").oninput = e => title = e.target.value;
+      document.getElementById("primaryKeyword").oninput = e => primaryKeyword = e.target.value;
+      document.querySelectorAll(".secondary-keyword").forEach(input => {
+        input.oninput = e => secondaryKeywords[parseInt(e.target.dataset.index)] = e.target.value;
+      });
 
-      // Input listeners
-      document.getElementById("title").oninput = e => title = e.target.value;
-      document.getElementById("primaryKeyword").oninput = e => primaryKeyword = e.target.value;
-      document.querySelectorAll(".secondary-keyword").forEach(input => {
-        input.oninput = e => secondaryKeywords[parseInt(e.target.dataset.index)] = e.target.value;
-      });
+      document.getElementById("generateBtn").onclick = generateDescriptions;
+      document.querySelectorAll(".copy-btn").forEach(btn => {
+        btn.onclick = () => copyToClipboard(btn.dataset.text);
+      });
+    };
 
-      document.getElementById("generateBtn").onclick = generateDescriptions;
-      document.querySelectorAll(".copy-btn").forEach(btn => {
-        btn.onclick = () => copyToClipboard(btn.dataset.text);
-      });
+    const generateDescriptions = async () => {
+      if (!primaryKeyword.trim()) {
+        error = "Primary keyword is required.";
+        render(); return;
+      }
 
-      const thumbInput = document.getElementById("thumbnail");
-      thumbInput && (thumbInput.onchange = () => {
-        const file = thumbInput.files[0];
-        thumbnail = file ? file.name : "";
-      });
-    };
+      loading = true;
+      error = "";
+      descriptions = [];
+      render();
 
-    const generateDescriptions = async () => {
-      if (!primaryKeyword.trim()) {
-        error = "Primary keyword is required.";
-        render(); return;
-      }
+      const filteredSecondaries = secondaryKeywords.filter(k => k.trim());
+      const prompt = `
+        Generate a JSON array of 5 YouTube video descriptions.
+        Each description should:
+        - Be between 100 to 120 words (about 600–720 characters).
+        - Start with an attention-grabbing hook.
+        - Include the exact primary keyword: "${primaryKeyword}".
+        - Include as many of the following secondary keywords as naturally possible: ${filteredSecondaries.join(", ") || "None"}.
+        - Explain what the video offers in 2 sentences.
+        - Contain 1 strong call-to-action.
+        - End with 2-3 trending and relevant hashtags.
+        - Do NOT include the title or thumbnail again in the output. Just the descriptions.
+      `;
 
-      loading = true;
-      error = "";
-      descriptions = [];
-      render();
+      const payload = {
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: { type: "ARRAY", items: { type: "STRING" } }
+        }
+      };
 
-      const filteredSecondaries = secondaryKeywords.filter(k => k.trim());
-      const prompt = `
-        Generate a JSON array of 5 YouTube video descriptions.
-        Each description should:
-        - Be between 100 to 120 words (about 600–720 characters).
-        - Start with an attention-grabbing hook.
-        - Include the exact primary keyword: "${primaryKeyword}".
-        - Include as many of the following secondary keywords as naturally possible: ${filteredSecondaries.join(", ") || "None"}.
-        - Explain what the video offers in 2 sentences.
-        - Contain 1 strong call-to-action.
-        - End with 2-3 trending and relevant hashtags.
-        - Do NOT include the title or thumbnail again in the output. Just the descriptions.
-      `;
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
 
-      const payload = {
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseMimeType: "application/json",
-          responseSchema: { type: "ARRAY", items: { type: "STRING" } }
-        }
-      };
+        const json = await res.json();
+        const content = json?.candidates?.[0]?.content?.parts?.[0]?.text;
+        const parsed = JSON.parse(content);
+        descriptions = Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        console.error(e);
+        error = "Something went wrong. Try again later.";
+      }
 
-      try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
+      loading = false;
+      render();
+    };
 
-        const json = await res.json();
-        const content = json?.candidates?.[0]?.content?.parts?.[0]?.text;
-        const parsed = JSON.parse(content);
-        descriptions = Array.isArray(parsed) ? parsed : [];
-      } catch (e) {
-        console.error(e);
-        error = "Something went wrong. Try again later.";
-      }
-
-      loading = false;
-      render();
-    };
-
-    render();
-  </script>
+    render();
+  </script>
 </body>
 </html>
