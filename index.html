@@ -16,7 +16,6 @@
         const apiKey = "AIzaSyC3m6k8ONG67lMr3YMEGT4svIWaYxig-BY";
 
         let title = "";
-        let thumbnail = null; // Store file object instead of name
         let primaryKeyword = "";
         let secondaryKeywords = ["", "", "", "", ""];
         let descriptions = [];
@@ -40,7 +39,7 @@
             
         const render = () => {
             const app = document.getElementById("app");
-            const canGenerate = (title.trim() || thumbnail) && primaryKeyword.trim() && !loading;
+            const canGenerate = title.trim() && primaryKeyword.trim() && !loading;
 
             app.innerHTML = `
                 <div class="min-h-screen bg-gray-900 text-white p-4 sm:p-8 flex justify-center">
@@ -54,14 +53,6 @@
                         <div class="mb-4">
                             <label class="block mb-2 text-gray-300 font-bold">YouTube Video Title</label>
                             <input id="title" class="w-full p-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none" value="${title}" placeholder="e.g. Best AI Tools for Students in 2025" />
-                            <p class="text-gray-500 text-sm mt-1">Or, attach a thumbnail below.</p>
-                        </div>
-
-                        <!-- Thumbnail (Optional) -->
-                        <div class="mb-4">
-                            <label class="block mb-2 text-gray-300 font-bold">Attach Thumbnail</label>
-                            <input type="file" id="thumbnail" accept="image/png, image/jpeg" class="text-white bg-gray-700 file:bg-gray-600 file:text-white file:rounded-lg file:px-4 file:py-2"/>
-                            <p class="text-gray-500 text-sm mt-1">Only PNG, JPG format acceptable. Size below 1MB.</p>
                         </div>
 
                         <!-- Primary Keyword -->
@@ -110,9 +101,6 @@
             // Add listeners after rendering
             document.getElementById("title").oninput = e => {
                 title = e.target.value;
-                if(title.trim()){
-                    thumbnail = null; // Clear thumbnail data
-                }
                 render();
             };
             document.getElementById("primaryKeyword").oninput = e => {
@@ -136,8 +124,8 @@
                 error = "Primary keyword is required.";
                 render(); return;
             }
-            if (!title.trim() && !thumbnail) {
-                error = "Please enter a title or attach a thumbnail.";
+            if (!title.trim()) {
+                error = "Please enter a title.";
                 render(); return;
             }
             if(!apiKey || apiKey === "PASTE_YOUR_API_KEY_HERE"){
@@ -153,28 +141,9 @@
             const filteredSecondaries = secondaryKeywords.filter(k => k.trim());
             let parts = [];
             
-            // Build prompt based on title or thumbnail
-            if (title.trim()) {
-                parts.push({
-                    text: `Generate a JSON array of 5 YouTube video descriptions for a video titled "${title}".`
-                });
-            } else if (thumbnail) {
-                const base64ImageData = await new Promise(resolve => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result.split(',')[1]);
-                    reader.readAsDataURL(thumbnail);
-                });
-                
-                parts.push({
-                    text: `Generate a JSON array of 5 YouTube video descriptions for the attached thumbnail. Describe what the video is about based on the image.`
-                });
-                parts.push({
-                    inlineData: {
-                        mimeType: thumbnail.type,
-                        data: base64ImageData
-                    }
-                });
-            }
+            parts.push({
+                text: `Generate a JSON array of 5 YouTube video descriptions for a video titled "${title}".`
+            });
 
             // Add the rest of the prompt details
             parts.push({
@@ -195,7 +164,7 @@
                     responseSchema: { type: "ARRAY", items: { type: "STRING" } }
                 }
             };
-            const modelName = thumbnail ? "gemini-2.5-flash-preview-05-20" : "gemini-2.5-flash-preview-05-20";
+            const modelName = "gemini-2.5-flash-preview-05-20";
 
             try {
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
@@ -216,32 +185,6 @@
             loading = false;
             render();
         };
-
-        const thumbInput = document.getElementById("thumbnail");
-        thumbInput && (thumbInput.onchange = e => {
-            const file = e.target.files[0];
-            if(file){
-                const validTypes = ['image/png', 'image/jpeg'];
-                const maxSize = 1048576; // 1 MB in bytes
-
-                if (!validTypes.includes(file.type)) {
-                    error = "Invalid file type. Please upload a JPG or PNG image.";
-                    thumbnail = null;
-                    e.target.value = ''; // Clear the file input
-                } else if (file.size > maxSize) {
-                    error = "File size exceeds 1MB. Please upload a smaller image.";
-                    thumbnail = null;
-                    e.target.value = ''; // Clear the file input
-                } else {
-                    error = ""; // Clear any previous errors
-                    thumbnail = file;
-                }
-            } else {
-                thumbnail = null;
-                error = ""; // Clear error if file input is cleared
-            }
-            render();
-        });
 
         render();
     </script>
