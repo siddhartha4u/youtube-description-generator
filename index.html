@@ -41,19 +41,19 @@
       const app = document.getElementById("app");
 
       app.innerHTML = `
-        <div class="min-h-screen bg-gray-900 text-white p-4 sm:p-8 flex justify-center items-center">
-          <div class="bg-gray-800 p-6 sm:p-10 rounded-xl shadow-2xl w-full max-w-4xl">
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-center mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
+        <div class="min-h-screen bg-gray-900 text-white p-8 flex justify-center">
+          <div class="bg-gray-800 p-6 sm:p-10 rounded-xl shadow-2xl w-full max-w-4xl mt-12 mb-12">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-center mb-3 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
               YouTube Description Generator ✍️
             </h1>
             <p class="text-center text-gray-400 mb-6">Fill in the details below to generate SEO-friendly video descriptions</p>
 
-                        <div class="mb-4">
+                        <div class="mb-3">
               <label class="block mb-2 text-gray-300 font-bold">YouTube Video Title</label>
               <input id="title" class="w-full p-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none" value="${title}" placeholder="e.g. Best AI Tools for Students in 2025" />
             </div>
 
-                        <div class="mb-4">
+                        <div class="mb-3">
               <label class="block mb-2 text-gray-300 font-bold">Primary Keyword</label>
               <input id="primaryKeyword" class="w-full p-3 rounded-lg bg-gray-700 text-white border border-gray-600" value="${primaryKeyword}" placeholder="Required keyword e.g. AI tools" />
             </div>
